@@ -19,7 +19,14 @@ export function login({ email, password }) {
 
 			const { result } = await response.json();
 
-			STORAGE.set(USER_STORAGE_KEY, result);
+			const oneDay = 24 * 60 * 60 * 1000;
+
+			const body = {
+				...result,
+				expiration_date: new Date().getTime() + oneDay,
+			};
+
+			STORAGE.set(USER_STORAGE_KEY, body);
 
 			resolve(result);
 		} catch (error) {

@@ -7,16 +7,21 @@ import { USER_STORAGE_KEY } from '../constants/storage-keys';
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-	const [user, setUser,] = useState();
+	const [user, setUser] = useState();
 	const [isLoading, setIsLoading] = useState(true);
 
 	useEffect(() => {
 		const interval = setInterval(async () => {
-			const currentUser = await STORAGE.get(USER_STORAGE_KEY);
-			
+			let currentUser = await STORAGE.get(USER_STORAGE_KEY);
+			const now = new Date().getTime();
+
+			if (currentUser?.expiration_date < now) {
+				currentUser = null;
+				await STORAGE.remove(USER_STORAGE_KEY);
+			}
+
 			const raw = JSON.stringify(currentUser);
 			const raw2 = JSON.stringify(user);
-			console.log(raw === raw2);
 
 			if (raw === raw2) return;
 			clearInterval(interval);
@@ -27,7 +32,9 @@ export const AuthProvider = ({ children }) => {
 	}, [setUser]);
 
 	return (
-		<AuthContext.Provider value={{ user, isAuthenticated: !!user, isLoading }}>
+		<AuthContext.Provider
+			value={{ user, isAuthenticated: !!user, isLoading }}
+		>
 			{children}
 		</AuthContext.Provider>
 	);

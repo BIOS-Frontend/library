@@ -10,10 +10,12 @@ import { deleteBook } from '../../../api/books';
 import ConfirmAlert from '../../common/ConfirmAlert/ConfirmAlert';
 
 import { queryClient } from '../../../routing/App';
+import BookFormModal from '../BookFormModal/BookFormModal';
 
 export default function BookListItemActionsButton({ data, ...props }) {
 	const [anchorEl, setAnchorEl] = useState(null);
 	const [confirmIsOpen, setConfirmIsOpen] = useState(false);
+	const [formModalIsOpened, setFormModalIsOpened] = useState(false);
 
 	const {
 		reset,
@@ -43,7 +45,10 @@ export default function BookListItemActionsButton({ data, ...props }) {
 		setConfirmIsOpen(true);
 	};
 
-	const onEditItemClick = () => {};
+	const onEditItemClick = () => {
+		setAnchorEl(null);
+		setFormModalIsOpened(true);
+	};
 
 	const onConfirmClose = (confirm) => {
 		setConfirmIsOpen(false);
@@ -53,6 +58,14 @@ export default function BookListItemActionsButton({ data, ...props }) {
 
 	const onSnackbarClose = () => {
 		reset();
+	};
+
+	const onFormModalClose = (shouldRefresh = false) => {
+		setFormModalIsOpened(false);
+
+		if (shouldRefresh) {
+			queryClient.invalidateQueries({ queryKey: ['getBooks'] });
+		}
 	};
 
 	return (
@@ -78,6 +91,15 @@ export default function BookListItemActionsButton({ data, ...props }) {
 					{message || error}
 				</Alert>
 			</Snackbar>
+			{formModalIsOpened && (
+				<BookFormModal
+					title="Editar Libro"
+					opened={formModalIsOpened}
+					onClose={onFormModalClose}
+					data={data}
+					submitButtonText="Editar"
+				/>
+			)}
 		</>
 	);
 }
