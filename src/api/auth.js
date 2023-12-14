@@ -28,6 +28,8 @@ export function login({ email, password }) {
 
 			STORAGE.set(USER_STORAGE_KEY, body);
 
+			window.dispatchEvent(new CustomEvent('login', { detail: body }));
+
 			resolve(result);
 		} catch (error) {
 			console.log(error);

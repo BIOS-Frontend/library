@@ -11,24 +11,23 @@ export const AuthProvider = ({ children }) => {
 	const [isLoading, setIsLoading] = useState(true);
 
 	useEffect(() => {
-		const interval = setInterval(async () => {
-			let currentUser = await STORAGE.get(USER_STORAGE_KEY);
+		window.addEventListener('login', ({ detail: user }) => {
+			setUser(user);
+		});
+		window.addEventListener('logout', () => {
+			setUser(null);
+		});
+
+		STORAGE.get(USER_STORAGE_KEY).then((currentUser) => {
 			const now = new Date().getTime();
 
 			if (currentUser?.expiration_date < now) {
 				currentUser = null;
-				await STORAGE.remove(USER_STORAGE_KEY);
+				STORAGE.remove(USER_STORAGE_KEY);
 			}
-
-			const raw = JSON.stringify(currentUser);
-			const raw2 = JSON.stringify(user);
-
-			if (raw === raw2) return;
-			clearInterval(interval);
+			if (currentUser) setUser(currentUser);
 			setIsLoading(false);
-
-			setUser(currentUser);
-		}, 1000);
+		});
 	}, [setUser]);
 
 	return (
